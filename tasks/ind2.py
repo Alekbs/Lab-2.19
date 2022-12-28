@@ -6,25 +6,29 @@ import argparse
 import pathlib
 import json
 import colorama
-from colorama import Fore, Style
+from colorama import Fore
 
 
 def tree(directory):
     """
     Создание древа файлов
     """
-    str = ""
+    str_t = ""
     for path in sorted(directory.rglob("*")):
         depth = len(path.relative_to(directory).parts)
         spacer = " " * depth
-        print(f"Это проверка: {path.name}")
-        if path
-        str += Fore.BLUE + Style.BRIGHT + f"{spacer} >> {path.name}\n"
+        if path.is_dir():
+            str_t += Fore.BLUE + f"{spacer} >> {path.name}\n"
+        else:
+            str_t += Fore.WHITE + f"{spacer} >> {path.name}\n"
         for new_path in sorted(directory.joinpath(path).glob("*")):
             depth = len(new_path.relative_to(directory.joinpath(path)).parts)
             spacer = "\t" * depth
-            str += Fore.BLUE + f"{spacer} > {new_path.name}\n"
-    return str
+            if path.is_dir():
+                spacer += Fore.BLUE + f"{spacer} >> {path.name}\n"
+            else:
+                spacer += Fore.WHITE + f"{spacer} >> {path.name}\n"
+    return str_t
 
 
 def size(filename):
@@ -47,9 +51,12 @@ def save(filename, lost):
 
 
 def help():
+    """
+    Вывод справки о коамндах
+    """
     print("all - просмотр полного пути файла")
     print("files - просмотр всех файлов в директории")
-    print("seze - просмотр размера файла")
+    print("dir - просмотр дирректорий")
     print("save - сохранение данных в json-файл")
     print("mkdir - создание дириктории")
     print("rmdir - удаление дириктории")
@@ -58,6 +65,9 @@ def help():
 
 
 def main(command_line=None):
+    """
+    Главная функция программы
+    """
     colorama.init()
     current = pathlib.Path.cwd()
     file_parser = argparse.ArgumentParser(add_help=False)
@@ -126,8 +136,8 @@ def main(command_line=None):
     elif args.command == "save":
         save(args.filename, tree(current))
     elif args.command == "dir":
-        p = pathlib.Path('.')
-        current = [print(x) for x in p.iterdir() if x.is_dir()]
+        p = pathlib.Path(".")
+        [print(Fore.BLUE + str(x)) for x in p.iterdir() if x.is_dir()]
     else:
         print('Введите"help" для вывода списка комманд')
 
